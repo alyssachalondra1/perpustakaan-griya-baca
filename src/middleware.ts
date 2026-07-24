@@ -30,7 +30,8 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/dashboard') || path.startsWith('/katalog') ||
     path.startsWith('/buku') || path.startsWith('/tambah') ||
     path.startsWith('/label') || path.startsWith('/import') ||
-    path.startsWith('/admin-management') || path.startsWith('/log')
+    path.startsWith('/admin-management') ||
+    path === '/log' || path.startsWith('/log/')
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
