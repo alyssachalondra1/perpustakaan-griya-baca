@@ -1,7 +1,7 @@
 // AI Vision memakai Google Gemini untuk membaca data buku dari foto cover.
 import type { Book } from '@/types'
 
-const MODEL = 'gemini-1.5-flash'
+const MODEL = 'gemini-3.1-flash-lite'
 
 function stripDataUrl(dataUrl: string): { mimeType: string; data: string } {
   const m = dataUrl.match(/^data:(.+?);base64,(.*)$/)
