@@ -20,3 +20,9 @@ body {
   .no-print { display: none !important; }
   body { background: white; }
 }
+
+@keyframes scanline {
+  0%, 100% { top: 12%; }
+  50% { top: 88%; }
+}
+.animate-scanline { animation: scanline 2s ease-in-out infinite; }

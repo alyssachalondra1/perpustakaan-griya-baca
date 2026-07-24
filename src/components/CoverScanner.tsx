@@ -8,14 +8,28 @@ export default function CoverScanner({ onResult }: { onResult: (meta: any) => vo
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  function toBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const r = new FileReader()
-      r.onload = () => resolve(r.result as string)
-      r.onerror = reject
-      r.readAsDataURL(file)
-    })
-  }
+function toBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => {
+      const img = new Image()
+      img.onload = () => {
+        const max = 1024
+        let { width, height } = img
+        if (width > height && width > max) { height = Math.round(height * max / width); width = max }
+        else if (height > max) { width = Math.round(width * max / height); height = max }
+        const canvas = document.createElement('canvas')
+        canvas.width = width; canvas.height = height
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height)
+        resolve(canvas.toDataURL('image/jpeg', 0.7))
+      }
+      img.onerror = reject
+      img.src = r.result as string
+    }
+    r.onerror = reject
+    r.readAsDataURL(file)
+  })
+}
 
   async function pick(e: React.ChangeEvent<HTMLInputElement>, which: 'front' | 'back') {
     const f = e.target.files?.[0]
