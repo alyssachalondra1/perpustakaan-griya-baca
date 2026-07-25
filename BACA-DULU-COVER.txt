@@ -1,0 +1,47 @@
+========================================================================
+  UPDATE: CARI GAMBAR COVER BY JUDUL DARI INTERNET (tanpa setup ribet)
+========================================================================
+
+Apa yang ditambahkan:
+Saat Scan Cover, AI membaca judul buku dari foto, LALU otomatis mencari
+gambar cover digital dari internet berdasarkan judulnya. Urutan pencarian:
+   1. Google Books (by judul)      <- gratis, tanpa setup
+   2. OpenLibrary (by judul)       <- gratis, tanpa setup
+   3. Apple Books / iTunes (judul) <- gratis, tanpa setup
+   4. (opsional) Google Images     <- hanya jika GOOGLE_CSE_ID diisi
+   5. Kalau semua gagal -> pakai FOTO hasil scan sebagai cover (dijamin
+      selalu ada gambar, penting untuk buku pemerintah yang tak terindeks).
+
+>>> TIDAK PERLU setup Google Cloud / Custom Search / API key tambahan. <<<
+Langsung jalan begitu file disalin & di-push.
+
+------------------------------------------------------------------------
+  FILE YANG DISALIN (timpa yang lama)
+------------------------------------------------------------------------
+  src/lib/coverSearch.ts                 (BARU - logika cari cover)
+  src/app/api/cover-search/route.ts      (BARU - endpoint cari cover)
+  src/components/CoverScanner.tsx         (GANTI - alur baru + kompres foto)
+
+------------------------------------------------------------------------
+  CARA PAKAI
+------------------------------------------------------------------------
+1) Salin 3 file di atas ke proyekmu (timpa yang sama).
+2) git add . && git commit -m "cari cover by judul dari internet" && git push
+3) Selesai. Coba tambah buku via "Scan Cover".
+
+------------------------------------------------------------------------
+  TENTANG "SEARCH THE ENTIRE WEB" (Google Custom Search)
+------------------------------------------------------------------------
+Google SUDAH MEN-DEPRECATE opsi "Search the entire web" untuk search engine
+baru (muncul tulisan "can no longer be enabled"). Jadi kita TIDAK memakainya.
+Kalau suatu saat kamu punya CSE lama yang masih aktif, kamu boleh mengisi
+env var GOOGLE_CSE_ID -> otomatis dipakai sebagai sumber tambahan. Kalau tidak
+diisi, aman: sistem pakai Google Books + OpenLibrary + Apple Books + foto scan.
+
+------------------------------------------------------------------------
+  CATATAN JUJUR
+------------------------------------------------------------------------
+- Hasil dari internet kadang KURANG PAS (bisa dapat gambar buku lain yang
+  mirip). Gambar tampil dulu di form -> bisa kamu hapus/ganti sebelum simpan.
+- Untuk buku pemerintah/BUDI yang memang tak ada di internet, otomatis jatuh
+  ke FOTO hasil scan -> tetap ada gambar yang sesuai buku asli.
