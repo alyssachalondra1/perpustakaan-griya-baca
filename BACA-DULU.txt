@@ -1,0 +1,79 @@
+========================================================================
+  UPDATE PERPUSTAKAAN GRIYA BACA v2
+  Perpustakaan publik (tanpa akun) + Bookmark + UI baru yang cerah
+========================================================================
+
+Cara pakai: ekstrak zip ini, lalu SALIN folder "src", "supabase",
+dan file "tailwind.config.ts" ke dalam folder proyekmu
+(C:\Users\alyss\Downloads\perpustakaan-griya-baca), TIMPA file yang sama.
+
+------------------------------------------------------------------------
+  LANGKAH 1 - HAPUS 1 FOLDER LAMA (WAJIB!)
+------------------------------------------------------------------------
+Hapus folder ini dari proyekmu:
+
+    src\app\(app)\buku
+
+Alasan: halaman detail buku sekarang dipindah ke src\app\buku (agar bisa
+dibuka publik tanpa login). Kalau folder lama tidak dihapus, Next.js error
+"duplicate route" karena ada dua /buku/[id].
+
+(Folder src\app\(app)\katalog TIDAK perlu dihapus - itu tetap dipakai admin.)
+
+------------------------------------------------------------------------
+  LANGKAH 2 - SALIN FILE DARI ZIP INI
+------------------------------------------------------------------------
+File baru / diganti (tinggal timpa):
+
+  tailwind.config.ts                         (tema: warna + font lucu)
+  src/app/globals.css                        (gaya tombol/kartu rounded)
+  src/app/layout.tsx                         (font Fredoka + Nunito)
+  src/app/page.tsx                           (LANDING = perpustakaan publik)
+  src/app/(app)/layout.tsx                   (area admin khusus staff)
+  src/app/auth/callback/route.ts             (arahkan user->/, staff->/dashboard)
+  src/app/login/user/page.tsx                (tampilan + link "tanpa login")
+  src/app/buku/[id]/page.tsx                 (detail buku PUBLIK + tombol simpan)
+  src/app/tersimpan/page.tsx                 (halaman buku tersimpan)
+  src/app/api/public-books/route.ts          (API daftar buku publik)
+  src/app/api/bookmarks/route.ts             (API bookmark)
+  src/components/PublicHeader.tsx            (header + login di pojok)
+  src/components/LibraryBrowser.tsx          (grid buku warna-warni)
+  src/components/BookmarkButton.tsx          (tombol simpan buku)
+  src/components/SavedList.tsx               (daftar buku tersimpan)
+  src/components/AppShell.tsx                (menu admin, tombol ke Perpustakaan)
+  src/middleware.ts                          (aturan akses + fix /log vs /login)
+
+------------------------------------------------------------------------
+  LANGKAH 3 - ATUR DATABASE (WAJIB, sekali saja)
+------------------------------------------------------------------------
+Buka Supabase > SQL Editor > tempel & jalankan seluruh isi file:
+
+    supabase/migration-v2.sql
+
+Ini akan:
+  - Membuat buku bisa dibaca publik (tanpa login).
+  - Membuat tabel "bookmarks" + aturan keamanannya.
+
+------------------------------------------------------------------------
+  LANGKAH 4 - PUSH KE GITHUB
+------------------------------------------------------------------------
+  git add .
+  git commit -m "v2: perpustakaan publik + bookmark + UI baru"
+  git push
+
+Vercel akan build ulang otomatis.
+
+------------------------------------------------------------------------
+  APA YANG BERUBAH
+------------------------------------------------------------------------
+1. Buka situs -> LANGSUNG lihat perpustakaan (grid buku). Tidak wajib akun.
+2. Tombol "Masuk" di POJOK KANAN ATAS -> pilih Login Pengunjung / Login Admin.
+3. Punya akun (login Google) -> bisa klik "Simpan buku" (bookmark) dan
+   melihatnya di menu "Tersimpan".
+4. Admin login -> otomatis ke Dashboard, dan tetap bisa buka "Perpustakaan".
+5. Tampilan baru: warna cerah, sudut tombol/kartu tumpul (rounded), font lucu
+   (Fredoka untuk judul, Nunito untuk teks). Sampul buku tanpa foto tampil
+   sebagai kartu warna-warni berisi judul.
+
+Catatan font: Fredoka & Nunito diambil otomatis oleh Next.js saat build
+(butuh internet - Vercel sudah pasti ada, jadi aman).

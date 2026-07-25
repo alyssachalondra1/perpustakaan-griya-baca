@@ -19,11 +19,12 @@ export default function UserLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-brand-400 to-brand-600 px-4">
       <div className="w-full max-w-sm">
-        <div className="mb-6 text-center">
-          <h1 className="text-xl font-bold text-brand-800">Login Pengunjung</h1>
-          <p className="text-sm text-slate-500">Lihat katalog buku Perpustakaan Griya Baca</p>
+        <div className="mb-6 text-center text-white">
+          <div className="mx-auto mb-3 grid h-16 w-16 place-items-center rounded-3xl bg-white/20 text-3xl">📚</div>
+          <h1 className="font-display text-2xl font-bold">Login Pengunjung</h1>
+          <p className="mt-1 text-sm text-brand-50">Simpan buku favoritmu di Perpustakaan Griya Baca</p>
         </div>
         <div className="card space-y-4">
           <button onClick={handleGoogle} disabled={loading} className="btn-outline w-full">
@@ -31,12 +32,12 @@ export default function UserLoginPage() {
             {loading ? 'Mengarahkan ke Google...' : 'Masuk dengan Google'}
           </button>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <p className="text-center text-xs text-slate-400">
-            Dengan masuk, Anda hanya dapat melihat & mencari koleksi buku.
-          </p>
+          <Link href="/" className="block text-center text-xs font-bold text-brand-700 hover:underline">
+            Lihat perpustakaan tanpa login &rarr;
+          </Link>
         </div>
         <div className="mt-4 text-center text-sm">
-          <Link href="/login/admin" className="text-brand-700 hover:underline">&larr; Masuk sebagai admin</Link>
+          <Link href="/login/admin" className="font-bold text-white/90 hover:underline">&larr; Masuk sebagai admin</Link>
         </div>
       </div>
     </main>

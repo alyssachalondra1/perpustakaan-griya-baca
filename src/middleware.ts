@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           response = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
@@ -26,12 +26,14 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
 
+  // Halaman staff (admin) + halaman "tersimpan" (butuh login apa pun).
+  // CATATAN: '/log' ditulis eksak agar TIDAK menangkap '/login'.
   const isProtected =
     path.startsWith('/dashboard') || path.startsWith('/katalog') ||
-    path.startsWith('/buku') || path.startsWith('/tambah') ||
-    path.startsWith('/label') || path.startsWith('/import') ||
-    path.startsWith('/admin-management') ||
-    path === '/log' || path.startsWith('/log/')
+    path.startsWith('/tambah') || path.startsWith('/label') ||
+    path.startsWith('/import') || path.startsWith('/admin-management') ||
+    path === '/log' || path.startsWith('/log/') ||
+    path === '/tersimpan' || path.startsWith('/tersimpan/')
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()

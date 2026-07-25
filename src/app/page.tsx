@@ -1,27 +1,34 @@
-import Link from 'next/link'
-import { getSessionProfile } from '@/lib/auth'
-import { redirect } from 'next/navigation'
+import { getSessionProfile, isStaff } from '@/lib/auth'
+import PublicHeader from '@/components/PublicHeader'
+import LibraryBrowser from '@/components/LibraryBrowser'
+
+export const dynamic = 'force-dynamic'
 
 export default async function Home() {
   const session = await getSessionProfile()
-  if (session) redirect('/dashboard')
+  const user = session
+    ? { name: session.profile.full_name || session.profile.username || 'Pengguna', isStaff: isStaff(session.profile.role) }
+    : null
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-brand-700 to-brand-900 px-4 text-center text-white">
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">PERPUSTAKAAN</h1>
-        <h2 className="text-2xl font-bold sm:text-3xl">GRIYA BACA</h2>
-        <p className="mt-3 text-sm text-brand-100">Sistem Inventaris Perpustakaan &middot; KKN Literasi</p>
-      </div>
-      <div className="flex w-full max-w-xs flex-col gap-3">
-        <Link href="/login/admin" className="btn bg-white text-brand-800 hover:bg-brand-50">
-          Masuk sebagai Admin
-        </Link>
-        <Link href="/login/user" className="btn border border-white/60 bg-transparent text-white hover:bg-white/10">
-          Masuk / Daftar sebagai Pengunjung
-        </Link>
-      </div>
-      <p className="mt-10 text-xs text-brand-200">perpustakaankkn298.my.id</p>
-    </main>
+    <>
+      <PublicHeader user={user} />
+
+      <section className="bg-gradient-to-b from-brand-400 to-brand-600 text-white">
+        <div className="mx-auto max-w-6xl px-4 py-10 text-center sm:py-14">
+          <span className="mb-3 inline-block rounded-full bg-white/20 px-4 py-1 text-xs font-bold">📚 Perpustakaan Digital</span>
+          <h1 className="font-display text-3xl font-bold leading-tight sm:text-5xl">Selamat Datang di<br />Perpustakaan Griya Baca</h1>
+          <p className="mx-auto mt-3 max-w-md text-sm text-brand-50 sm:text-base">Jelajahi semua koleksi buku kami secara gratis &mdash; tanpa perlu membuat akun! Punya akun? Kamu bisa menyimpan buku favoritmu.</p>
+        </div>
+      </section>
+
+      <main className="mx-auto max-w-6xl px-4 py-8">
+        <LibraryBrowser />
+      </main>
+
+      <footer className="pb-10 pt-4 text-center text-xs text-slate-400">
+        Perpustakaan Griya Baca &middot; KKN Literasi &middot; perpustakaankkn298.my.id
+      </footer>
+    </>
   )
 }
