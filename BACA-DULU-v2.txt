@@ -1,56 +1,60 @@
 =====================================================
-  GRIYA BACA v2 - paket gabungan
+  PERPUSTAKAAN IBNU ABBAS - paket v2 (gabungan)
 =====================================================
 
 Timpa file berikut ke project, lalu commit & push (Vercel auto-deploy).
 Semua path relatif dari root project.
 
-*** WAJIB: jalankan dulu SQL di bawah sebelum deploy ***
-  supabase/migration-v3.sql  -> tambah kolom "label_printed_at"
+*** WAJIB: jalankan dulu SQL sebelum deploy ***
+  supabase/migration-v3.sql
+   - tambah kolom "label_printed_at" (penanda sudah dicetak)
+   - set baris label: "Perpustakaan" / "Ibnu Abbas"
   (buka Supabase > SQL Editor, tempel isinya, Run. Sekali saja.)
 
 -----------------------------------------------------
   1) DDC & LEVEL jadi OPSIONAL (tidak wajib diisi)
 -----------------------------------------------------
-  src/types.ts                       <- + field label_printed_at
+  src/types.ts                       (+ field label_printed_at)
   src/components/BookForm.tsx
 
 -----------------------------------------------------
-  2) KPI "INFO BELUM LENGKAP" + penanda "BELUM ADA DDC"
-     + MODE KELOLA (pilih semua -> hapus massal / cetak label)
+  2) KPI "INFO BELUM LENGKAP" + MODE KELOLA
+     (pilih semua -> hapus massal / cetak label)
 -----------------------------------------------------
   src/app/(app)/dashboard/page.tsx
   src/app/(app)/katalog/page.tsx
   src/app/api/books/bulk-delete/route.ts
 
 -----------------------------------------------------
-  3) FILTER JENJANG di TAMPILAN PENGUNJUNG
+  3) TAMPILAN PENGUNJUNG
 -----------------------------------------------------
-  src/components/LibraryBrowser.tsx
+  src/app/api/public-books/route.ts  <- limit dinaikkan 300 -> 2000
+                                        (sebelumnya cuma 300 buku yg tampil!)
+                                        SEMUA buku tampil, termasuk yg infonya
+                                        belum lengkap (tanda "belum lengkap"
+                                        HANYA di sisi admin).
+  src/components/LibraryBrowser.tsx  <- filter jenjang
+  src/app/page.tsx                   <- landing: "Selamat Datang di
+                                        Perpustakaan Ibnu Abbas"
+  src/components/PublicHeader.tsx    <- brand "Perpustakaan Ibnu Abbas"
 
 -----------------------------------------------------
   4) CETAK LABEL: PRINT RAPI + MULTI-FILTER + TANDA DICETAK
+     + FORMAT "Perpustakaan / Ibnu Abbas"
 -----------------------------------------------------
-  src/app/(app)/label/page.tsx       <- halaman label baru:
-     - PDF/print RAPI: hanya tabel label yg tercetak, TANPA sidebar/menu web
-     - Multi-filter (bisa digabung): cari teks + status cetak
-       (semua / belum dicetak / sudah dicetak) + kelengkapan info
-       (semua / lengkap / belum lengkap) + jenjang
-     - Tombol "Pilih semua yang lengkap" (selain "Pilih semua")
-     - Badge "✓ dicetak" pada buku yang sudah pernah dicetak
-     - Tombol "Tandai sudah dicetak" / "Batalkan tanda" manual
+  src/app/(app)/label/page.tsx       <- PDF/print rapi (tanpa sidebar),
+                                        multi-filter (cari + status cetak +
+                                        kelengkapan + jenjang), "Pilih semua
+                                        yang lengkap", badge "dicetak",
+                                        tandai/batalkan tanda manual.
+                                        Baris label: Perpustakaan / Ibnu Abbas.
+  src/lib/label.ts                   <- default baris label -> Perpustakaan /
+                                        Ibnu Abbas (DOCX)
   src/app/api/label/route.ts         <- DOCX diunduh -> otomatis tandai dicetak
-  src/app/api/label/mark/route.ts    <- endpoint tandai/batalkan tanda (staff)
-  src/components/AppShell.tsx        <- sidebar & header diberi kelas no-print
-  src/app/globals.css                <- aturan @media print (hanya .print-area
-                                        yg tercetak) + gaya grid label
-  supabase/migration-v3.sql          <- kolom label_printed_at (JALANKAN)
-
-  Cara deteksi "sudah dicetak":
-   - Unduh DOCX  -> pasti tercatat (server menandai saat file dibuat).
-   - Cetak/PDF   -> ditandai setelah dialog cetak ditutup (best-effort;
-                    browser tidak bisa tahu pasti apakah PDF benar disimpan).
-   - Kalau perlu, koreksi manual pakai "Tandai sudah dicetak"/"Batalkan tanda".
+  src/app/api/label/mark/route.ts    <- endpoint tandai/batalkan (staff)
+  src/components/AppShell.tsx        <- sidebar & header no-print
+  src/app/globals.css                <- aturan @media print + gaya grid label
+  supabase/migration-v3.sql          <- JALANKAN (kolom + nama baris label)
 
 -----------------------------------------------------
   5) AMBIL COVER OTOMATIS (superadmin, tanpa setup)
@@ -64,12 +68,10 @@ Semua path relatif dari root project.
   src/app/globals.css
 
 =====================================================
-  CATATAN DATA (Excel impor)
+  CATATAN
 =====================================================
-  File "IMPORT - Data Buku Griya Baca.xlsx":
-  - LEVEL (Perjenjangan) TIDAK diubah - tetap dari data manualmu.
-  - Nomor Klasifikasi (DDC): 418 terisi dari pencocokan judul dgn data KKN lain;
-    95 masih kosong (dilengkapi admin nanti).
-  - Tanggal Terima: diseragamkan menjadi 2025-07-27 untuk semua buku.
-  - File KKN lain kolom "Nomor Inventaris"-nya berisi LEVEL (bukan nomor),
-    jadi nomor inventaris tetap dibuat otomatis oleh web saat impor.
+  - Branding sisi ADMIN (menu, judul tab, halaman login) MASIH "Griya Baca".
+    Kalau mau semuanya diganti "Ibnu Abbas", bilang saja.
+  - Excel "IMPORT - Data Buku Griya Baca.xlsx": DDC 418 terisi / 95 kosong,
+    tanggal terima diseragamkan 2025-07-27, level tidak diubah, nomor
+    inventaris dibuat otomatis saat impor.

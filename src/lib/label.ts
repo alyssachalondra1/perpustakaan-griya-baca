@@ -1,7 +1,7 @@
 // ============================================================================
 //  Generator LABEL BUKU (nomor panggil) -> DOCX
-//  Format mengikuti contoh label:
-//    PERPUSTAKAAN / GRIYA BACA / <DDC> / <NM-PNGRNG> / <PRTM JDL>
+//  Format mengikuti contoh label (BSrE):
+//    Perpustakaan / Ibnu Abbas / <DDC> / <NM-PNGRNG> / <PRTM JDL>
 //  Disusun grid 3 label per baris.
 // ============================================================================
 import {
@@ -12,7 +12,7 @@ import type { Book } from '@/types'
 
 export interface LabelData { baris1: string; baris2: string; ddc: string; nm: string; jdl: string }
 
-export function bookToLabel(b: Book, baris1 = 'PERPUSTAKAAN', baris2 = 'GRIYA BACA'): LabelData {
+export function bookToLabel(b: Book, baris1 = 'Perpustakaan', baris2 = 'Ibnu Abbas'): LabelData {
   return { baris1, baris2, ddc: b.nomor_klasifikasi || '', nm: b.nm_pngrng || '', jdl: b.prtm_jdl || '' }
 }
 

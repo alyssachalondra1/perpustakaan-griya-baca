@@ -16,7 +16,8 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   const { data: settings } = await supabase.from('library_settings').select('*').eq('id', 1).single()
-  const buf = await buildLabelDocx((books as any) || [], settings?.nama_baris1, settings?.nama_baris2)
+  // Baris label: baris1 = "Perpustakaan", baris2 = nama sekolah ("Ibnu Abbas").
+  const buf = await buildLabelDocx((books as any) || [], settings?.nama_baris1 || 'Perpustakaan', settings?.nama_baris2 || 'Ibnu Abbas')
 
   // Tandai buku-buku ini sebagai "sudah dicetak" (DOCX diunduh).
   await supabase.from('books').update({ label_printed_at: new Date().toISOString() }).in('id', ids)

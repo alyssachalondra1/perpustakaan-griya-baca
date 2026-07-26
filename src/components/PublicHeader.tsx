@@ -21,7 +21,7 @@ export default function PublicHeader({ user }: { user: { name: string; isStaff: 
         <Link href="/" className="flex items-center gap-2.5">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-xl text-white">📚</span>
           <span className="leading-tight">
-            <span className="block text-lg font-extrabold tracking-tight text-slate-800">Griya Baca</span>
+            <span className="block text-lg font-extrabold tracking-tight text-slate-800">Perpustakaan Ibnu Abbas</span>
             <span className="block text-[11px] text-slate-400">Perpustakaan Digital</span>
           </span>
         </Link>

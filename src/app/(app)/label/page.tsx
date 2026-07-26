@@ -173,8 +173,8 @@ function LabelInner() {
             <div className="label-grid">
               {chosen.map((r) => (
                 <div key={r.id} className="label-cell text-[10px]">
-                  <span>PERPUSTAKAAN</span>
-                  <span>GRIYA BACA</span>
+                  <span>Perpustakaan</span>
+                  <span>Ibnu Abbas</span>
                   <span className="text-xs">{r.nomor_klasifikasi || '-'}</span>
                   <span className="text-xs">{r.nm_pngrng || '-'}</span>
                   <span className="text-xs">{r.prtm_jdl || '-'}</span>

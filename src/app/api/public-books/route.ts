@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 // Daftar buku PUBLIK - bisa diakses tanpa login (untuk halaman perpustakaan).
+// Menampilkan SEMUA buku (termasuk yang infonya belum lengkap). Tanda "belum
+// lengkap" hanya ada di sisi admin, bukan di tampilan pengunjung.
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
@@ -12,7 +14,7 @@ export async function GET(request: Request) {
     .from('books')
     .select('id, judul_buku, pengarang, penerbit, tahun_terbit, nomor_inventaris, nomor_klasifikasi, subjek, perjenjangan, isbn, cover_url')
     .order('created_at', { ascending: false })
-    .limit(300)
+    .limit(2000)
 
   if (search) {
     const like = `%${search}%`
