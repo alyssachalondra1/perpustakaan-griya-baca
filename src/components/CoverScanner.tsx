@@ -3,12 +3,19 @@ import { useState } from 'react'
 
 // Ambil foto cover depan & belakang (kamera HP) -> AI Vision (Gemini) baca judul dll,
 // lalu OTOMATIS cari GAMBAR COVER digital dari internet berdasarkan judulnya.
+// Foto HP TIDAK dipakai otomatis sebagai sampul (biar tampilan tetap rapi) -
+// user memilih sendiri di langkah pratinjau.
 export default function CoverScanner({ onResult }: { onResult: (meta: any) => void }) {
   const [front, setFront] = useState<string>('')
   const [back, setBack] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
+
+  // Hasil analisa + pilihan cover (langkah pratinjau)
+  const [meta, setMeta] = useState<any | null>(null)
+  const [foundCover, setFoundCover] = useState('')
+  const [choice, setChoice] = useState<'found' | 'photo' | 'none'>('none')
 
   // Perkecil foto sebelum dikirim (biar AI cepat & hemat kuota).
   function toBase64(file: File): Promise<string> {
@@ -56,27 +63,33 @@ export default function CoverScanner({ onResult }: { onResult: (meta: any) => vo
       const j = await res.json().catch(() => ({})); setError(j.error || 'AI gagal membaca cover.'); return
     }
     const json = await res.json()
-    const meta = json.data || {}
+    const m = json.data || {}
 
-    // Kalau AI belum dapat gambar cover, cari gambar digital dari internet by judul.
-    if (!meta.cover_url && meta.judul_buku) {
+    // Cari gambar cover digital dari internet berdasarkan judul.
+    let cover = m.cover_url || ''
+    if (!cover && m.judul_buku) {
       setStatus('🎨 Mencari gambar cover dari internet...')
       try {
-        const q = '/api/cover-search?title=' + encodeURIComponent(meta.judul_buku) +
-          '&author=' + encodeURIComponent(meta.pengarang || '')
+        const q = '/api/cover-search?title=' + encodeURIComponent(m.judul_buku) +
+          '&author=' + encodeURIComponent(m.pengarang || '')
         const cr = await fetch(q)
         if (cr.ok) {
           const cj = await cr.json()
-          if (cj.data?.cover_url) meta.cover_url = cj.data.cover_url
+          if (cj.data?.cover_url) cover = cj.data.cover_url
         }
       } catch {}
     }
 
-    // Cadangan terakhir: kalau tetap tidak ketemu, pakai FOTO hasil scan sebagai cover.
-    if (!meta.cover_url && front) meta.cover_url = front
-
     setLoading(false); setStatus('')
-    onResult(meta)
+    setMeta(m)
+    setFoundCover(cover)
+    setChoice(cover ? 'found' : 'none') // default: cover internet kalau ada, kalau tidak -> kartu warna
+  }
+
+  function confirmChoice() {
+    if (!meta) return
+    const cover = choice === 'found' ? foundCover : choice === 'photo' ? front : ''
+    onResult({ ...meta, cover_url: cover })
   }
 
   const Slot = ({ label, val, which }: { label: string; val: string; which: 'front' | 'back' }) => (
@@ -92,6 +105,60 @@ export default function CoverScanner({ onResult }: { onResult: (meta: any) => vo
     </label>
   )
 
+  const Opt = ({ id, title, children }: { id: 'found' | 'photo' | 'none'; title: string; children: React.ReactNode }) => (
+    <button type="button" onClick={() => setChoice(id)}
+      className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-3 text-center transition ${choice === id ? 'border-brand-500 bg-brand-50' : 'border-slate-200 hover:border-brand-300'}`}>
+      {children}
+      <span className="text-xs font-bold text-slate-600">{title}</span>
+    </button>
+  )
+
+  // ---- Langkah 2: pratinjau & pilih cover ----
+  if (meta) {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm font-bold text-brand-700">✅ AI selesai membaca: <span className="text-slate-800">{meta.judul_buku || '(judul kosong)'}</span></p>
+        <p className="text-sm text-slate-500">Pilih gambar sampul untuk ditampilkan di web:</p>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Opt id="found" title={foundCover ? 'Cover dari internet' : 'Tidak tersedia'}>
+            {foundCover ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={foundCover} alt="cover internet" className="h-28 w-20 rounded-lg object-cover" />
+            ) : (
+              <div className="grid h-28 w-20 place-items-center rounded-lg bg-slate-100 text-2xl text-slate-300">—</div>
+            )}
+          </Opt>
+
+          <Opt id="none" title="Kartu warna (rapi)">
+            <div className="grid h-28 w-20 place-items-center rounded-lg bg-gradient-to-br from-rose-400 to-violet-400 px-1 text-center">
+              <span className="font-display text-[10px] font-bold leading-tight text-white line-clamp-4">{meta.judul_buku || 'Judul Buku'}</span>
+            </div>
+          </Opt>
+
+          <Opt id="photo" title="Foto hasil scan">
+            {front ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={front} alt="foto scan" className="h-28 w-20 rounded-lg object-cover" />
+            ) : (
+              <div className="grid h-28 w-20 place-items-center rounded-lg bg-slate-100 text-2xl">📷</div>
+            )}
+          </Opt>
+        </div>
+
+        <p className="text-xs text-slate-400">
+          Rekomendasi: pakai “Cover dari internet” jika ada. Kalau tidak tersedia, “Kartu warna” biasanya lebih rapi daripada foto HP.
+        </p>
+
+        <div className="flex gap-2">
+          <button onClick={() => { setMeta(null); setFoundCover('') }} className="btn-outline">&larr; Ulangi</button>
+          <button onClick={confirmChoice} className="btn-primary flex-1">Lanjut isi data →</button>
+        </div>
+      </div>
+    )
+  }
+
+  // ---- Langkah 1: ambil foto ----
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
@@ -105,7 +172,7 @@ export default function CoverScanner({ onResult }: { onResult: (meta: any) => vo
       </button>
       <p className="text-xs text-slate-400">
         AI membaca judul dari foto, lalu mencari gambar cover digital dari internet.
-        Jika tidak ketemu, foto hasil scan otomatis dipakai sebagai cover. Semua data tetap bisa dikoreksi manual.
+        Foto HP tidak otomatis jadi sampul — kamu pilih sendiri di langkah berikutnya.
       </p>
     </div>
   )
