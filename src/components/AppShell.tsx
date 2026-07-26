@@ -33,7 +33,7 @@ export default function AppShell({ profile, children }: { profile: Profile; chil
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-100 bg-white/90 px-4 py-3 backdrop-blur">
+      <header className="no-print sticky top-0 z-30 flex items-center justify-between border-b border-slate-100 bg-white/90 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-3">
           <button className="rounded-lg p-1 text-slate-600 md:hidden" onClick={() => setOpen(!open)} aria-label="Menu">
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" /></svg>
@@ -57,7 +57,7 @@ export default function AppShell({ profile, children }: { profile: Profile; chil
       </header>
 
       <div className="flex">
-        <aside className={`fixed inset-y-0 left-0 z-40 w-64 transform border-r border-slate-100 bg-white pt-16 transition-transform md:static md:translate-x-0 md:pt-4 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+        <aside className={`no-print fixed inset-y-0 left-0 z-40 w-64 transform border-r border-slate-100 bg-white pt-16 transition-transform md:static md:translate-x-0 md:pt-4 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
           <nav className="space-y-1 p-3">
             {items.map((n) => {
               const active = pathname === n.href || pathname.startsWith(n.href + '/')
@@ -70,7 +70,7 @@ export default function AppShell({ profile, children }: { profile: Profile; chil
             })}
           </nav>
         </aside>
-        {open && <div className="fixed inset-0 z-30 bg-black/30 md:hidden" onClick={() => setOpen(false)} />}
+        {open && <div className="no-print fixed inset-0 z-30 bg-black/30 md:hidden" onClick={() => setOpen(false)} />}
 
         <main className="min-h-[calc(100vh-61px)] flex-1 p-4 sm:p-6">{children}</main>
       </div>

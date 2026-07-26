@@ -1,0 +1,75 @@
+=====================================================
+  GRIYA BACA v2 - paket gabungan
+=====================================================
+
+Timpa file berikut ke project, lalu commit & push (Vercel auto-deploy).
+Semua path relatif dari root project.
+
+*** WAJIB: jalankan dulu SQL di bawah sebelum deploy ***
+  supabase/migration-v3.sql  -> tambah kolom "label_printed_at"
+  (buka Supabase > SQL Editor, tempel isinya, Run. Sekali saja.)
+
+-----------------------------------------------------
+  1) DDC & LEVEL jadi OPSIONAL (tidak wajib diisi)
+-----------------------------------------------------
+  src/types.ts                       <- + field label_printed_at
+  src/components/BookForm.tsx
+
+-----------------------------------------------------
+  2) KPI "INFO BELUM LENGKAP" + penanda "BELUM ADA DDC"
+     + MODE KELOLA (pilih semua -> hapus massal / cetak label)
+-----------------------------------------------------
+  src/app/(app)/dashboard/page.tsx
+  src/app/(app)/katalog/page.tsx
+  src/app/api/books/bulk-delete/route.ts
+
+-----------------------------------------------------
+  3) FILTER JENJANG di TAMPILAN PENGUNJUNG
+-----------------------------------------------------
+  src/components/LibraryBrowser.tsx
+
+-----------------------------------------------------
+  4) CETAK LABEL: PRINT RAPI + MULTI-FILTER + TANDA DICETAK
+-----------------------------------------------------
+  src/app/(app)/label/page.tsx       <- halaman label baru:
+     - PDF/print RAPI: hanya tabel label yg tercetak, TANPA sidebar/menu web
+     - Multi-filter (bisa digabung): cari teks + status cetak
+       (semua / belum dicetak / sudah dicetak) + kelengkapan info
+       (semua / lengkap / belum lengkap) + jenjang
+     - Tombol "Pilih semua yang lengkap" (selain "Pilih semua")
+     - Badge "✓ dicetak" pada buku yang sudah pernah dicetak
+     - Tombol "Tandai sudah dicetak" / "Batalkan tanda" manual
+  src/app/api/label/route.ts         <- DOCX diunduh -> otomatis tandai dicetak
+  src/app/api/label/mark/route.ts    <- endpoint tandai/batalkan tanda (staff)
+  src/components/AppShell.tsx        <- sidebar & header diberi kelas no-print
+  src/app/globals.css                <- aturan @media print (hanya .print-area
+                                        yg tercetak) + gaya grid label
+  supabase/migration-v3.sql          <- kolom label_printed_at (JALANKAN)
+
+  Cara deteksi "sudah dicetak":
+   - Unduh DOCX  -> pasti tercatat (server menandai saat file dibuat).
+   - Cetak/PDF   -> ditandai setelah dialog cetak ditutup (best-effort;
+                    browser tidak bisa tahu pasti apakah PDF benar disimpan).
+   - Kalau perlu, koreksi manual pakai "Tandai sudah dicetak"/"Batalkan tanda".
+
+-----------------------------------------------------
+  5) AMBIL COVER OTOMATIS (superadmin, tanpa setup)
+-----------------------------------------------------
+  src/app/api/cover-backfill/route.ts
+  src/components/CoverBackfill.tsx
+
+-----------------------------------------------------
+  6) PERBAIKAN TAMPILAN HP
+-----------------------------------------------------
+  src/app/globals.css
+
+=====================================================
+  CATATAN DATA (Excel impor)
+=====================================================
+  File "IMPORT - Data Buku Griya Baca.xlsx":
+  - LEVEL (Perjenjangan) TIDAK diubah - tetap dari data manualmu.
+  - Nomor Klasifikasi (DDC): 418 terisi dari pencocokan judul dgn data KKN lain;
+    95 masih kosong (dilengkapi admin nanti).
+  - Tanggal Terima: diseragamkan menjadi 2025-07-27 untuk semua buku.
+  - File KKN lain kolom "Nomor Inventaris"-nya berisi LEVEL (bukan nomor),
+    jadi nomor inventaris tetap dibuat otomatis oleh web saat impor.

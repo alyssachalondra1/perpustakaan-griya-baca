@@ -31,6 +31,7 @@ export interface Book {
   cover_url: string | null
   deskripsi: string | null
   input_method: string | null
+  label_printed_at: string | null
   created_by: string | null
   created_at: string
   updated_at: string

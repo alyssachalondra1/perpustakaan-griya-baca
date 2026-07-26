@@ -18,6 +18,9 @@ export async function POST(request: Request) {
   const { data: settings } = await supabase.from('library_settings').select('*').eq('id', 1).single()
   const buf = await buildLabelDocx((books as any) || [], settings?.nama_baris1, settings?.nama_baris2)
 
+  // Tandai buku-buku ini sebagai "sudah dicetak" (DOCX diunduh).
+  await supabase.from('books').update({ label_printed_at: new Date().toISOString() }).in('id', ids)
+
   return new NextResponse(buf, {
     headers: {
       'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
