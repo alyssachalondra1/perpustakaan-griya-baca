@@ -13,6 +13,8 @@ async function count(table: string, filter?: (q: any) => any) {
   return count || 0
 }
 
+const TILE = ['from-orange-400 to-rose-500', 'from-sky-400 to-indigo-500', 'from-emerald-400 to-teal-500', 'from-violet-400 to-fuchsia-500', 'from-amber-400 to-orange-500', 'from-cyan-400 to-blue-500']
+
 export default async function DashboardPage() {
   const session = await getSessionProfile()
   const supabase = createClient()
@@ -23,7 +25,7 @@ export default async function DashboardPage() {
 
   const { data: terbaru } = await supabase
     .from('books')
-    .select('id, judul_buku, pengarang, nomor_inventaris, created_at, cover_url')
+    .select('id, judul_buku, pengarang, nomor_inventaris, created_at')
     .order('created_at', { ascending: false })
     .limit(6)
 
@@ -34,9 +36,9 @@ export default async function DashboardPage() {
     .limit(7)
 
   const stat = [
-    { label: 'Total Buku', value: totalBuku, icon: '📖' },
-    { label: 'Total Admin', value: totalAdmin, icon: '👤' },
-    { label: 'Total Pengunjung', value: totalUser, icon: '👥' }
+    { label: 'Total Buku', value: totalBuku, icon: '📚', grad: 'from-orange-400 to-rose-500' },
+    { label: 'Total Admin', value: totalAdmin, icon: '🛡️', grad: 'from-sky-400 to-indigo-500' },
+    { label: 'Total Pengunjung', value: totalUser, icon: '👥', grad: 'from-emerald-400 to-teal-500' }
   ]
 
   const staff = isStaff(session?.profile.role)
@@ -44,42 +46,46 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-800">Selamat datang, {session?.profile.full_name || session?.profile.username} 👋</h1>
+        <h1 className="text-2xl text-slate-800">Selamat datang, {session?.profile.full_name || session?.profile.username} 👋</h1>
         <p className="text-sm text-slate-500">Ringkasan inventaris Perpustakaan Griya Baca.</p>
       </div>
 
-      {staff && (
-        <div className="card">
-          <h2 className="mb-2 font-semibold text-slate-800">Export Data Excel</h2>
-          <ExportButtons />
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {stat.map((s) => (
-          <div key={s.label} className="card flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-50 text-2xl">{s.icon}</div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800">{s.value.toLocaleString('id-ID')}</p>
-              <p className="text-sm text-slate-500">{s.label}</p>
+          <div key={s.label} className={`stat bg-gradient-to-br ${s.grad}`}>
+            <div className="stat-deco -right-6 -top-10 h-32 w-32" />
+            <div className="stat-deco -bottom-10 right-10 h-20 w-20 bg-white/10" />
+            <div className="relative z-10">
+              <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-white/25 text-xl backdrop-blur-sm">{s.icon}</div>
+              <p className="text-3xl font-extrabold leading-none">{s.value.toLocaleString('id-ID')}</p>
+              <p className="mt-1.5 text-sm font-medium text-white/90">{s.label}</p>
             </div>
           </div>
         ))}
       </div>
 
+      {staff && (
+        <div className="card">
+          <h2 className="mb-3 text-base text-slate-800">Export Data Excel</h2>
+          <ExportButtons />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="card lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold text-slate-800">Buku Terbaru</h2>
-            <Link href="/katalog" className="text-sm text-brand-700 hover:underline">Lihat semua</Link>
+            <h2 className="text-base text-slate-800">Buku Terbaru</h2>
+            <Link href="/katalog" className="text-sm font-semibold text-brand-700 hover:underline">Lihat semua</Link>
           </div>
           {terbaru && terbaru.length > 0 ? (
             <ul className="divide-y divide-slate-100">
-              {terbaru.map((b) => (
-                <li key={b.id} className="flex items-center gap-3 py-2">
-                  <div className="flex h-10 w-8 shrink-0 items-center justify-center rounded bg-slate-100 text-xs">📘</div>
+              {terbaru.map((b, i) => (
+                <li key={b.id} className="flex items-center gap-3 py-2.5">
+                  <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${TILE[i % TILE.length]} text-sm font-extrabold text-white`}>
+                    {(b.judul_buku || '?').charAt(0).toUpperCase()}
+                  </div>
                   <div className="min-w-0 flex-1">
-                    <Link href={`/buku/${b.id}`} className="block truncate text-sm font-medium text-slate-800 hover:text-brand-700">{b.judul_buku}</Link>
+                    <Link href={`/buku/${b.id}`} className="block truncate text-sm font-semibold text-slate-800 hover:text-brand-700">{b.judul_buku}</Link>
                     <p className="truncate text-xs text-slate-400">{b.pengarang} &middot; No. {b.nomor_inventaris}</p>
                   </div>
                 </li>
@@ -89,9 +95,9 @@ export default async function DashboardPage() {
         </div>
 
         <div className="card">
-          <h2 className="mb-3 font-semibold text-slate-800">Statistik Inventaris</h2>
+          <h2 className="mb-3 text-base text-slate-800">Statistik Inventaris</h2>
           {rekap && rekap.length > 0 ? (
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {rekap.map((r: any) => (
                 <li key={r.tanggal} className="flex items-center justify-between text-sm">
                   <span className="text-slate-500">{new Date(r.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>

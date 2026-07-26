@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-body)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'ui-sans-serif', 'system-ui', 'sans-serif']
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif']
       },
       colors: {
         brand: {
@@ -18,8 +18,7 @@ const config: Config = {
           300: '#7fc596', 400: '#4fa96e', 500: '#2f8f52',
           600: '#217140', 700: '#1b5a34', 800: '#17482b', 900: '#123a23'
         }
-      },
-      borderRadius: { '4xl': '2rem' }
+      }
     }
   },
   plugins: []

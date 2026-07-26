@@ -1,0 +1,56 @@
+=====================================================
+  GRIYA BACA - PERBAIKAN TAMPILAN (UI REFRESH)
+=====================================================
+
+Apa yang berubah di paket ini:
+
+1. FONT TEGAS (bukan bulat)
+   - Ganti font Fredoka yang membulat -> Plus Jakarta Sans.
+     Tetap modern & ramah, tapi tegas dan mudah dibaca.
+
+2. WARNA & LAYOUT LEBIH CERAH + MINIMALIS MODERN
+   - Latar lembut (lavender/abu muda), kartu sudut membulat halus,
+     bayangan tipis. Tidak terlihat "kaku ala AI".
+   - Dashboard: kartu statistik GRADIEN warna-warni (oranye-rose,
+     biru-indigo, hijau-teal) dengan angka besar + ikon.
+
+3. TIDAK MENAMPILKAN COVER DI DAFTAR
+   - Karena tidak semua buku punya cover, daftar (katalog admin &
+     halaman perpustakaan publik) TIDAK lagi menampilkan gambar cover.
+   - Sebagai gantinya: kotak warna berisi HURUF AWAL judul.
+     Tampilan jadi rapi & konsisten walau cover kosong.
+   - COVER hanya muncul saat buku DIBUKA (halaman detail /buku/[id]).
+
+4. PERBAIKAN TEKS "KEPOTONG / MELUBER KE BAWAH"
+   - Judul dibatasi 2 baris rapi (line-clamp), nama pengarang &
+     nomor dipotong dengan elipsis (truncate), chip subjek selalu
+     satu baris. Tidak ada lagi teks yang meluber keluar kotak.
+
+-----------------------------------------------------
+  CARA PAKAI (replace file berikut, timpa yang lama)
+-----------------------------------------------------
+
+Salin file-file ini ke project kamu (timpa yang ada):
+
+  src/app/layout.tsx                 <- font Plus Jakarta Sans
+  src/app/globals.css                <- tema baru (warna, kartu, chip, .stat)
+  tailwind.config.ts                 <- daftar font
+  src/app/(app)/dashboard/page.tsx   <- kartu statistik gradien
+  src/app/(app)/katalog/page.tsx     <- daftar tanpa cover
+  src/components/AppShell.tsx        <- sidebar/header modern
+  src/components/LibraryBrowser.tsx  <- perpustakaan publik tanpa cover
+  src/components/PublicHeader.tsx    <- header publik modern
+
+CATATAN:
+- LibraryBrowser.tsx & PublicHeader.tsx hanya dipakai kalau kamu
+  sudah menerapkan update "perpustakaan publik + bookmark" sebelumnya.
+  Kalau belum, cukup timpa file lainnya - tetap aman.
+- Tidak ada perubahan database. Tidak perlu setup Google Cloud.
+- Halaman detail buku (/buku/[id]) TIDAK diubah - cover tetap tampil
+  di sana seperti biasa.
+
+Setelah menimpa file:
+  1. Simpan semua.
+  2. Commit & push ke GitHub (Vercel akan auto-deploy).
+     Font Plus Jakarta Sans diunduh otomatis saat build (butuh internet
+     saat build di Vercel - ini sudah otomatis).
