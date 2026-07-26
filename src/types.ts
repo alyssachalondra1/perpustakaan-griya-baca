@@ -36,7 +36,8 @@ export interface Book {
   updated_at: string
 }
 
+// DDC (nomor_klasifikasi) & perjenjangan TIDAK wajib: boleh dikosongkan dulu,
+// dilengkapi admin kemudian (scan KDT / isi manual).
 export const REQUIRED_FIELDS: (keyof Book)[] = [
-  'judul_buku', 'pengarang', 'penerbit', 'tahun_terbit',
-  'jumlah_eksemplar', 'nomor_klasifikasi'
+  'judul_buku', 'pengarang', 'penerbit', 'tahun_terbit', 'jumlah_eksemplar'
 ]

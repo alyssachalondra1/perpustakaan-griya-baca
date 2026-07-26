@@ -1,0 +1,33 @@
+=====================================================
+  GRIYA BACA - IMPORT EXCEL (Cover + Perjenjangan)
+=====================================================
+
+Apa yang berubah pada kode web:
+
+1. Import Excel sekarang membaca kolom TAMBAHAN (berdasarkan nama header):
+   - "Cover"        -> masuk ke cover_url (gambar sampul)
+   - "Perjenjangan" -> masuk ke perjenjangan (level buku)
+   - "ISBN"         -> masuk ke isbn (opsional)
+   Kolom inti Perpusnas (13 kolom FIX) tetap dibaca seperti biasa.
+
+2. Import lebih tahan banting: baris header dicari otomatis walau ada
+   baris kosong di atasnya.
+
+3. EKSPOR tetap menghasilkan format Perpusnas PERSIS:
+   - TBM (10 kolom) atau FIX (13 kolom). Kolom Cover/Perjenjangan TIDAK
+     ikut diekspor (sesuai syarat Perpusnas).
+
+Jadi alurnya: 1 file Excel -> Import ke web -> nanti bisa Ekspor lagi
+ke format Perpusnas (TBM/FIX) dari menu Export.
+
+-----------------------------------------------------
+  CARA PAKAI (timpa 2 file)
+-----------------------------------------------------
+  src/lib/excel.ts                <- baca kolom Cover/Perjenjangan/ISBN
+  src/app/api/import/route.ts     <- simpan cover_url, perjenjangan, isbn
+
+Syarat kolom di database (Supabase) sudah ada: cover_url, perjenjangan,
+isbn (sudah dipakai fitur lain). Tidak perlu migrasi baru.
+
+Setelah menimpa: simpan -> commit -> push (Vercel auto-deploy).
+Import hanya bisa dilakukan oleh akun superadmin, via menu Import Excel.

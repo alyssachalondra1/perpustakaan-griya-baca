@@ -1,6 +1,8 @@
 // ============================================================================
-//  IMPORT & EXPORT Excel - format PERSIS mengikuti 2 file referensi.
-//  Urutan kolom TIDAK boleh berubah (syarat Perpusnas).
+//  IMPORT & EXPORT Excel - format PERSIS mengikuti 2 file referensi Perpusnas.
+//  Urutan kolom TIDAK boleh berubah untuk EKSPOR (syarat Perpusnas).
+//  Untuk IMPOR, kolom dibaca berdasarkan NAMA header, jadi kolom tambahan
+//  seperti "Cover" dan "Perjenjangan" boleh ada dan tetap ikut terbaca.
 // ============================================================================
 import * as XLSX from 'xlsx'
 import type { Book } from '@/types'
@@ -64,10 +66,16 @@ export function parseWorkbook(buf: ArrayBuffer): ImportResult {
   const aoa = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1, blankrows: false })
   if (aoa.length === 0) return { total: 0, valid: [], failed: [], detectedFormat: 'unknown' }
 
-  const header = (aoa[0] as any[]).map(norm)
+  // Cari baris header (yang mengandung "judul buku") - toleran terhadap baris kosong di atas.
+  let hIdx = 0
+  for (let i = 0; i < Math.min(aoa.length, 5); i++) {
+    const rowNorm = (aoa[i] as any[]).map(norm)
+    if (rowNorm.some((c) => c.includes('judul'))) { hIdx = i; break }
+  }
+  const header = (aoa[hIdx] as any[]).map(norm)
   const isFix = header.includes('nomor klasifikasi') || header.includes('nm-pngrng')
   const detectedFormat: ExportFormat | 'unknown' =
-    header.includes('judul buku') ? (isFix ? 'fix' : 'tbm') : 'unknown'
+    header.some((h) => h.includes('judul')) ? (isFix ? 'fix' : 'tbm') : 'unknown'
 
   const idx = (name: string) => header.indexOf(norm(name))
   const col = {
@@ -75,12 +83,13 @@ export function parseWorkbook(buf: ArrayBuffer): ImportResult {
     pengarang: idx('Pengarang'), penerbit: idx('Penerbit'), tahun: idx('Tahun Terbit'),
     jumlah: idx('Jumlah Eksemplar'), subjek: idx('Subjek'), sumber: idx('Sumber'),
     keterangan: idx('Keterangan'), klas: idx('nomor klasifikasi'),
-    nm: idx('NM-PNGRNG'), jdl: idx('PRTM JDL')
+    nm: idx('NM-PNGRNG'), jdl: idx('PRTM JDL'),
+    cover: idx('Cover'), perjenjangan: idx('Perjenjangan'), isbn: idx('ISBN')
   }
 
   const valid: ParsedRow[] = []
   const failed: ParsedRow[] = []
-  for (let r = 1; r < aoa.length; r++) {
+  for (let r = hIdx + 1; r < aoa.length; r++) {
     const row = aoa[r] as any[]
     if (!row || row.every((c) => String(c ?? '').trim() === '')) continue
     const get = (i: number) => (i >= 0 ? row[i] : undefined)
@@ -96,7 +105,10 @@ export function parseWorkbook(buf: ArrayBuffer): ImportResult {
       keterangan: get(col.keterangan) ? String(get(col.keterangan)).trim() : '',
       nomor_klasifikasi: get(col.klas) ? String(get(col.klas)).trim() : '',
       nm_pngrng: get(col.nm) ? String(get(col.nm)).trim() : '',
-      prtm_jdl: get(col.jdl) ? String(get(col.jdl)).trim() : ''
+      prtm_jdl: get(col.jdl) ? String(get(col.jdl)).trim() : '',
+      cover_url: get(col.cover) ? String(get(col.cover)).trim() : '',
+      perjenjangan: get(col.perjenjangan) ? String(get(col.perjenjangan)).trim() : '',
+      isbn: get(col.isbn) ? String(get(col.isbn)).trim() : ''
     }
     const missing: string[] = []
     if (!data.judul_buku) missing.push('Judul Buku')

@@ -6,13 +6,13 @@ import type { Book } from '@/types'
 
 export type BookInput = Partial<Book>
 
+// DDC (nomor_klasifikasi) & perjenjangan TIDAK lagi wajib.
 const REQUIRED: { key: keyof Book; label: string }[] = [
   { key: 'judul_buku', label: 'Judul Buku' },
   { key: 'pengarang', label: 'Pengarang' },
   { key: 'penerbit', label: 'Penerbit' },
   { key: 'tahun_terbit', label: 'Tahun Terbit' },
-  { key: 'jumlah_eksemplar', label: 'Jumlah Eksemplar' },
-  { key: 'nomor_klasifikasi', label: 'Nomor Klasifikasi' }
+  { key: 'jumlah_eksemplar', label: 'Jumlah Eksemplar' }
 ]
 
 export default function BookForm({ initial, editId }: { initial?: BookInput; editId?: string }) {
@@ -68,7 +68,7 @@ export default function BookForm({ initial, editId }: { initial?: BookInput; edi
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={form.cover_url} alt="cover" className="h-24 w-16 rounded object-cover" />
-          <span className="text-xs text-slate-400">Cover otomatis dari hasil scan/Google Books</span>
+          <span className="text-xs text-slate-400">Cover otomatis dari hasil scan/pencarian online</span>
         </div>
       ) : null}
 
@@ -81,11 +81,11 @@ export default function BookForm({ initial, editId }: { initial?: BookInput; edi
         <Field k="subjek" label="Subjek" />
         <Field k="sumber" label="Sumber" />
         <div>
-          <label className="label">Nomor Klasifikasi (DDC) <span className="text-red-500">*</span></label>
-          <input className="input" value={form.nomor_klasifikasi ?? ''} onChange={(e) => set('nomor_klasifikasi', e.target.value)} placeholder="mis. 398.2" />
-          {ddcHint && <p className="mt-1 text-xs text-brand-700">Saran: {ddcHint.ddc} ({ddcHint.label}) &mdash; tetap boleh diubah.</p>}
+          <label className="label">Nomor Klasifikasi (DDC) <span className="text-xs font-normal text-slate-400">(opsional)</span></label>
+          <input className="input" value={form.nomor_klasifikasi ?? ''} onChange={(e) => set('nomor_klasifikasi', e.target.value)} placeholder="mis. 398.2 — boleh dikosongkan, isi nanti" />
+          {ddcHint && <p className="mt-1 text-xs text-brand-700">Saran: {ddcHint.ddc} ({ddcHint.label}) &mdash; boleh diubah/dikosongkan.</p>}
         </div>
-        <Field k="perjenjangan" label="Perjenjangan (Level 1/2, A, B1-B3, C)" />
+        <Field k="perjenjangan" label="Perjenjangan / Level (opsional)" />
         <Field k="isbn" label="ISBN (opsional, tidak diekspor)" />
         <div className="sm:col-span-2">
           <label className="label">Keterangan</label>

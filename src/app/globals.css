@@ -4,6 +4,11 @@
 
 :root { color-scheme: light; }
 
+/* Cegah scroll horizontal & elemen meluber di layar HP (perbaikan "tidak pas di screen") */
+html, body { max-width: 100%; overflow-x: hidden; }
+* { min-width: 0; }
+img, video, canvas, svg { max-width: 100%; height: auto; }
+
 body {
   @apply bg-[#f4f5fb] text-slate-800 antialiased;
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;

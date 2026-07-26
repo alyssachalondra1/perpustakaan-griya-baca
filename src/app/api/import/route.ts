@@ -36,6 +36,10 @@ export async function POST(request: Request) {
     nomor_klasifikasi: v.data.nomor_klasifikasi || null,
     nm_pngrng: v.data.nm_pngrng || nmPngrng(v.data.pengarang || ''),
     prtm_jdl: v.data.prtm_jdl || prtmJdl(v.data.judul_buku || ''),
+    // Kolom tambahan dari Excel (jika ada): cover, perjenjangan, isbn
+    cover_url: v.data.cover_url || null,
+    perjenjangan: v.data.perjenjangan || null,
+    isbn: v.data.isbn || null,
     input_method: 'import', created_by: session!.userId
   }))
 

@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { getSessionProfile, isStaff } from '@/lib/auth'
+import { getSessionProfile, isStaff, isSuperadmin } from '@/lib/auth'
 import ExportButtons from '@/components/ExportButtons'
+import CoverBackfill from '@/components/CoverBackfill'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +23,8 @@ export default async function DashboardPage() {
   const totalBuku = await count('books')
   const totalAdmin = await count('profiles', (q) => q.in('role', ['admin', 'superadmin']))
   const totalUser = await count('profiles', (q) => q.eq('role', 'user'))
+  // Buku yang DDC-nya masih kosong (perlu dilengkapi admin)
+  const tanpaDdc = await count('books', (q) => q.or('nomor_klasifikasi.is.null,nomor_klasifikasi.eq.'))
 
   const { data: terbaru } = await supabase
     .from('books')
@@ -42,6 +45,7 @@ export default async function DashboardPage() {
   ]
 
   const staff = isStaff(session?.profile.role)
+  const superadmin = isSuperadmin(session?.profile.role)
 
   return (
     <div className="space-y-6">
@@ -63,6 +67,20 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Penanda: buku yang DDC-nya masih kosong */}
+      {staff && tanpaDdc > 0 && (
+        <Link href="/katalog?ddc=kosong" className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 transition hover:bg-amber-100">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-400 text-lg text-white">⚠️</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-amber-800">{tanpaDdc.toLocaleString('id-ID')} buku belum ada Nomor Klasifikasi (DDC)</p>
+            <p className="text-xs text-amber-700">Klik untuk melihat &amp; melengkapi (scan halaman KDT atau isi manual).</p>
+          </div>
+          <span className="text-sm font-semibold text-amber-700">Lihat →</span>
+        </Link>
+      )}
+
+      {superadmin && <CoverBackfill />}
 
       {staff && (
         <div className="card">

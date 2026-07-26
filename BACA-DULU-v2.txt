@@ -1,0 +1,64 @@
+=====================================================
+  GRIYA BACA v2 - DDC/Level opsional + Cover otomatis
+  + penanda DDC kosong + perbaikan tampilan HP
+=====================================================
+
+Timpa file-file berikut ke project kamu, lalu commit & push
+(Vercel auto-deploy). Semua path relatif dari root project.
+
+-----------------------------------------------------
+  1) DDC & LEVEL jadi OPSIONAL (tidak wajib diisi)
+-----------------------------------------------------
+  src/types.ts                    <- REQUIRED_FIELDS tanpa nomor_klasifikasi
+  src/components/BookForm.tsx     <- DDC & Perjenjangan opsional (tanpa tanda *)
+
+  Sekarang buku bisa disimpan walau DDC / level kosong.
+  Server (api/books) memang sudah menerima kosong, jadi aman.
+
+-----------------------------------------------------
+  2) PENANDA "BELUM ADA DDC" di tampilan admin
+-----------------------------------------------------
+  src/app/(app)/dashboard/page.tsx   <- kartu peringatan "X buku belum ada DDC"
+  src/app/(app)/katalog/page.tsx     <- badge "Belum ada DDC" + filter
+
+  - Di Dashboard muncul kartu kuning berisi jumlah buku yang DDC-nya kosong;
+    diklik -> ke Katalog dengan filter otomatis menyala.
+  - Di Katalog ada tombol "Belum ada DDC (jumlah)" untuk menyaring, dan
+    tiap kartu buku tanpa DDC diberi badge kuning.
+  - Admin tinggal buka buku -> Edit -> scan halaman KDT / isi DDC manual.
+
+-----------------------------------------------------
+  3) AMBIL COVER OTOMATIS (dijalankan dari web)
+-----------------------------------------------------
+  src/app/api/cover-backfill/route.ts   <- endpoint batch (khusus superadmin)
+  src/components/CoverBackfill.tsx       <- tombol + progress (tampil di Dashboard)
+
+  Cara pakai: login sebagai superadmin -> buka Dashboard -> panel
+  "Ambil Cover Otomatis" -> klik "Mulai ambil cover". Sistem mencari sampul
+  dari internet (Google Books -> OpenLibrary -> Apple Books) berdasarkan
+  judul + pengarang, per-batch, sampai selesai. Biarkan halaman terbuka.
+
+  - Ketemu  -> cover langsung tersimpan & tampil di halaman detail buku.
+  - Tidak ketemu -> dibiarkan tanpa cover (tidak dicoba ulang otomatis).
+  Catatan jujur: banyak buku Badan Bahasa/Perpusnas TIDAK punya sampul
+  digital di sumber-sumber itu, jadi kemungkinan hanya sebagian yang dapat.
+
+-----------------------------------------------------
+  4) PERBAIKAN TAMPILAN HP (tidak pas di layar)
+-----------------------------------------------------
+  src/app/globals.css   <- cegah scroll horizontal / elemen meluber
+    (html,body overflow-x hidden + gambar max-width 100%).
+
+  Kalau masih ada bagian/tabel tertentu yang tidak rapih di HP, kirim
+  screenshot halaman spesifiknya ya biar diperbaiki tepat sasaran.
+
+=====================================================
+  URUTAN IMPOR DATA 513 BUKU
+=====================================================
+  1. Terapkan paket "griya-baca-import" (excel.ts + api/import) supaya kolom
+     Cover & Perjenjangan ikut terbaca. (lihat BACA-DULU-IMPORT.txt)
+  2. Terapkan paket v2 ini (push & deploy).
+  3. Login superadmin -> menu Import Excel -> unggah
+     "IMPORT - Data Buku Griya Baca.xlsx" -> Preview -> Import.
+  4. Dashboard -> "Ambil Cover Otomatis" -> Mulai.
+  5. DDC dilengkapi bertahap lewat badge "Belum ada DDC" di Katalog.
