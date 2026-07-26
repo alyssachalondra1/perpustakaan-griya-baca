@@ -25,6 +25,10 @@ export default async function DashboardPage() {
   const totalUser = await count('profiles', (q) => q.eq('role', 'user'))
   // Buku yang DDC-nya masih kosong (perlu dilengkapi admin)
   const tanpaDdc = await count('books', (q) => q.or('nomor_klasifikasi.is.null,nomor_klasifikasi.eq.'))
+  // Buku yang informasinya belum lengkap (DDC / penerbit / tahun / pengarang kosong)
+  const { data: cek } = await supabase.from('books').select('nomor_klasifikasi, penerbit, tahun_terbit, pengarang')
+  const kurang = (b: any) => !String(b.nomor_klasifikasi || '').trim() || !String(b.penerbit || '').trim() || !String(b.tahun_terbit || '').trim() || !String(b.pengarang || '').trim()
+  const infoKurang = (cek || []).filter(kurang).length
 
   const { data: terbaru } = await supabase
     .from('books')
@@ -41,7 +45,8 @@ export default async function DashboardPage() {
   const stat = [
     { label: 'Total Buku', value: totalBuku, icon: '📚', grad: 'from-orange-400 to-rose-500' },
     { label: 'Total Admin', value: totalAdmin, icon: '🛡️', grad: 'from-sky-400 to-indigo-500' },
-    { label: 'Total Pengunjung', value: totalUser, icon: '👥', grad: 'from-emerald-400 to-teal-500' }
+    { label: 'Total Pengunjung', value: totalUser, icon: '👥', grad: 'from-emerald-400 to-teal-500' },
+    { label: 'Info Belum Lengkap', value: infoKurang, icon: '📝', grad: 'from-amber-400 to-orange-500', href: '/katalog?info=kurang' }
   ]
 
   const staff = isStaff(session?.profile.role)
@@ -54,18 +59,24 @@ export default async function DashboardPage() {
         <p className="text-sm text-slate-500">Ringkasan inventaris Perpustakaan Griya Baca.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {stat.map((s) => (
-          <div key={s.label} className={`stat bg-gradient-to-br ${s.grad}`}>
-            <div className="stat-deco -right-6 -top-10 h-32 w-32" />
-            <div className="stat-deco -bottom-10 right-10 h-20 w-20 bg-white/10" />
-            <div className="relative z-10">
-              <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-white/25 text-xl backdrop-blur-sm">{s.icon}</div>
-              <p className="text-3xl font-extrabold leading-none">{s.value.toLocaleString('id-ID')}</p>
-              <p className="mt-1.5 text-sm font-medium text-white/90">{s.label}</p>
-            </div>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stat.map((s) => {
+          const inner = (
+            <>
+              <div className="stat-deco -right-6 -top-10 h-32 w-32" />
+              <div className="stat-deco -bottom-10 right-10 h-20 w-20 bg-white/10" />
+              <div className="relative z-10">
+                <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-white/25 text-xl backdrop-blur-sm">{s.icon}</div>
+                <p className="text-3xl font-extrabold leading-none">{s.value.toLocaleString('id-ID')}</p>
+                <p className="mt-1.5 text-sm font-medium text-white/90">{s.label}</p>
+              </div>
+            </>
+          )
+          const cls = `stat bg-gradient-to-br ${s.grad}`
+          return (s as any).href
+            ? <Link key={s.label} href={(s as any).href} className={`${cls} block transition hover:brightness-105`}>{inner}</Link>
+            : <div key={s.label} className={cls}>{inner}</div>
+        })}
       </div>
 
       {/* Penanda: buku yang DDC-nya masih kosong */}
