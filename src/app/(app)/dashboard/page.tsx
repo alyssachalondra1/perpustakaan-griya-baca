@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { getSessionProfile, isStaff, isSuperadmin } from '@/lib/auth'
+import { getSessionProfile, isStaff } from '@/lib/auth'
 import ExportButtons from '@/components/ExportButtons'
-import CoverBackfill from '@/components/CoverBackfill'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +49,6 @@ export default async function DashboardPage() {
   ]
 
   const staff = isStaff(session?.profile.role)
-  const superadmin = isSuperadmin(session?.profile.role)
 
   return (
     <div className="space-y-6">
@@ -90,8 +88,6 @@ export default async function DashboardPage() {
           <span className="text-sm font-semibold text-amber-700">Lihat →</span>
         </Link>
       )}
-
-      {superadmin && <CoverBackfill />}
 
       {staff && (
         <div className="card">

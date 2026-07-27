@@ -6,7 +6,7 @@ import type { Book } from '@/types'
 
 export type BookInput = Partial<Book>
 
-// DDC (nomor_klasifikasi) & perjenjangan TIDAK lagi wajib.
+// DDC (nomor_klasifikasi) & perjenjangan TIDAK wajib.
 const REQUIRED: { key: keyof Book; label: string }[] = [
   { key: 'judul_buku', label: 'Judul Buku' },
   { key: 'pengarang', label: 'Pengarang' },
@@ -54,13 +54,24 @@ export default function BookForm({ initial, editId }: { initial?: BookInput; edi
     }
   }
 
-  const Field = ({ k, label, type = 'text', req = false }: { k: keyof Book; label: string; type?: string; req?: boolean }) => (
-    <div>
-      <label className="label">{label} {req && <span className="text-red-500">*</span>}</label>
-      <input className="input" type={type} value={(form as any)[k] ?? ''}
-        onChange={(e) => set(k, type === 'number' ? Number(e.target.value) : e.target.value)} />
-    </div>
-  )
+  // PENTING: input ditulis LANGSUNG (bukan lewat komponen <Field/> di dalam
+  // render). Sebelumnya <Field/> dibuat ulang tiap render sehihngga input
+  // di-remount & keyboard HP ketutup tiap ketik 1 huruf. Ini yang diperbaiki.
+  function field(k: keyof Book, label: string, opts?: { type?: string; req?: boolean; span2?: boolean }) {
+    const type = opts?.type || 'text'
+    return (
+      <div key={String(k)} className={opts?.span2 ? 'sm:col-span-2' : ''}>
+        <label className="label">{label} {opts?.req && <span className="text-red-500">*</span>}</label>
+        <input
+          className="input"
+          type={type}
+          inputMode={type === 'number' ? 'numeric' : undefined}
+          value={(form as any)[k] ?? ''}
+          onChange={(e) => set(k, type === 'number' ? Number(e.target.value) : e.target.value)}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
@@ -68,25 +79,25 @@ export default function BookForm({ initial, editId }: { initial?: BookInput; edi
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={form.cover_url} alt="cover" className="h-24 w-16 rounded object-cover" />
-          <span className="text-xs text-slate-400">Cover otomatis dari hasil scan/pencarian online</span>
+          <span className="text-xs text-slate-400">Cover buku</span>
         </div>
       ) : null}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="sm:col-span-2"><Field k="judul_buku" label="Judul Buku" req /></div>
-        <Field k="pengarang" label="Pengarang" req />
-        <Field k="penerbit" label="Penerbit" req />
-        <Field k="tahun_terbit" label="Tahun Terbit" req />
-        <Field k="jumlah_eksemplar" label="Jumlah Eksemplar" type="number" req />
-        <Field k="subjek" label="Subjek" />
-        <Field k="sumber" label="Sumber" />
+        {field('judul_buku', 'Judul Buku', { req: true, span2: true })}
+        {field('pengarang', 'Pengarang', { req: true })}
+        {field('penerbit', 'Penerbit', { req: true })}
+        {field('tahun_terbit', 'Tahun Terbit', { req: true })}
+        {field('jumlah_eksemplar', 'Jumlah Eksemplar', { req: true, type: 'number' })}
+        {field('subjek', 'Subjek')}
+        {field('sumber', 'Sumber')}
         <div>
           <label className="label">Nomor Klasifikasi (DDC) <span className="text-xs font-normal text-slate-400">(opsional)</span></label>
           <input className="input" value={form.nomor_klasifikasi ?? ''} onChange={(e) => set('nomor_klasifikasi', e.target.value)} placeholder="mis. 398.2 — boleh dikosongkan, isi nanti" />
           {ddcHint && <p className="mt-1 text-xs text-brand-700">Saran: {ddcHint.ddc} ({ddcHint.label}) &mdash; boleh diubah/dikosongkan.</p>}
         </div>
-        <Field k="perjenjangan" label="Perjenjangan / Level (opsional)" />
-        <Field k="isbn" label="ISBN (opsional, tidak diekspor)" />
+        {field('perjenjangan', 'Perjenjangan / Level (opsional)')}
+        {field('isbn', 'ISBN (opsional, tidak diekspor)')}
         <div className="sm:col-span-2">
           <label className="label">Keterangan</label>
           <textarea className="input" rows={2} value={form.keterangan ?? ''} onChange={(e) => set('keterangan', e.target.value)} />

@@ -5,21 +5,39 @@ import { nmPngrng, prtmJdl } from '@/lib/classification'
 import { writeLog } from '@/lib/log'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60
+
+// Daftar untuk katalog admin - kolom ringan saja (TANPA deskripsi & cover_url
+// yang berat) supaya query cepat & tidak timeout saat buku sudah banyak.
+const LIST_COLS =
+  'id, tanggal_terima, nomor_inventaris, judul_buku, pengarang, penerbit, tahun_terbit, jumlah_eksemplar, subjek, sumber, keterangan, nomor_klasifikasi, nm_pngrng, prtm_jdl, perjenjangan, isbn, label_printed_at, input_method, created_at'
 
 export async function GET(request: Request) {
   const supabase = createClient()
   const search = new URL(request.url).searchParams.get('search')?.trim() || ''
-  let q = supabase.from('books').select('*').order('created_at', { ascending: false })
-  if (search) {
-    const like = `%${search}%`
-    q = q.or([
-      `judul_buku.ilike.${like}`, `pengarang.ilike.${like}`, `isbn.ilike.${like}`,
-      `nomor_inventaris.ilike.${like}`, `nomor_klasifikasi.ilike.${like}`
-    ].join(','))
+
+  const PAGE = 500
+  const all: any[] = []
+  try {
+    for (let from = 0; ; from += PAGE) {
+      let q = supabase.from('books').select(LIST_COLS).order('created_at', { ascending: false }).range(from, from + PAGE - 1)
+      if (search) {
+        const like = `%${search}%`
+        q = q.or([
+          `judul_buku.ilike.${like}`, `pengarang.ilike.${like}`, `isbn.ilike.${like}`,
+          `nomor_inventaris.ilike.${like}`, `nomor_klasifikasi.ilike.${like}`
+        ].join(','))
+      }
+      const { data, error } = await q
+      if (error) throw new Error(error.message)
+      if (data && data.length) all.push(...data)
+      if (!data || data.length < PAGE) break
+      if (all.length > 100000) break
+    }
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 })
   }
-  const { data, error } = await q.limit(500)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+  return NextResponse.json({ data: all })
 }
 
 export async function POST(request: Request) {

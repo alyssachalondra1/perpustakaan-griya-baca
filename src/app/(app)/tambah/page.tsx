@@ -1,16 +1,17 @@
 'use client'
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import BarcodeScanner from '@/components/BarcodeScanner'
 import CoverScanner from '@/components/CoverScanner'
 import BookForm, { BookInput } from '@/components/BookForm'
 
-type Tab = 'isbn' | 'cover' | 'manual'
+// Metode input: Scan Cover (AI) & Input Manual.
+// Fitur "Scan ISBN" DIHILANGKAN sesuai permintaan.
+type Tab = 'cover' | 'manual'
 
 function TambahInner() {
   const params = useSearchParams()
   const editId = params.get('edit') || undefined
-  const [tab, setTab] = useState<Tab>('isbn')
+  const [tab, setTab] = useState<Tab>('cover')
   const [prefill, setPrefill] = useState<BookInput | undefined>(undefined)
   const [ready, setReady] = useState(!editId)
   const [notice, setNotice] = useState('')
@@ -22,20 +23,6 @@ function TambahInner() {
     })
   }, [editId])
 
-  async function onIsbn(isbn: string) {
-    setNotice('Mengambil data dari Google Books...')
-    const res = await fetch('/api/google-books?isbn=' + encodeURIComponent(isbn))
-    const json = await res.json()
-    if (json.data) {
-      setPrefill({ ...json.data, isbn, input_method: 'isbn' })
-      setNotice('Data ISBN ditemukan. Lengkapi field yang masih kosong lalu simpan.')
-    } else {
-      setPrefill({ isbn, input_method: 'isbn' })
-      setNotice('ISBN tidak ditemukan di Google Books. Silakan isi manual atau coba Scan Cover.')
-    }
-    setTab('manual')
-  }
-
   function onVision(meta: any) {
     setPrefill({ ...meta, input_method: 'cover' })
     setNotice('AI selesai membaca cover. Periksa & lengkapi data sebelum menyimpan.')
@@ -43,16 +30,15 @@ function TambahInner() {
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'isbn', label: '1. Scan ISBN' },
-    { id: 'cover', label: '2. Scan Cover' },
-    { id: 'manual', label: '3. Input Manual' }
+    { id: 'cover', label: '📷 Scan Cover' },
+    { id: 'manual', label: '✍️ Input Manual' }
   ]
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <div>
         <h1 className="text-xl font-bold text-slate-800">{editId ? 'Edit Buku' : 'Tambah Buku'}</h1>
-        <p className="text-sm text-slate-500">Pilih metode input. Semua field wajib harus terisi sebelum disimpan.</p>
+        <p className="text-sm text-slate-500">Scan cover dengan AI atau isi manual. Field wajib harus terisi sebelum disimpan.</p>
       </div>
 
       {!editId && (
@@ -69,7 +55,6 @@ function TambahInner() {
       {notice && <div className="rounded-lg bg-brand-50 p-3 text-sm text-brand-800">{notice}</div>}
 
       <div className="card">
-        {tab === 'isbn' && !editId && <BarcodeScanner onDetected={onIsbn} />}
         {tab === 'cover' && !editId && <CoverScanner onResult={onVision} />}
         {tab === 'manual' && ready && <BookForm initial={prefill} editId={editId} />}
         {tab === 'manual' && !ready && <p className="text-sm text-slate-400">Memuat data...</p>}

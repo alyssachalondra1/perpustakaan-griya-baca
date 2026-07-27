@@ -57,6 +57,28 @@ Semua path relatif dari root project.
   supabase/migration-v3.sql          <- JALANKAN (kolom + nama baris label)
 
 -----------------------------------------------------
+  4b) PERBAIKAN "TIMEOUT": export & tampilan pengunjung
+      kosong saat buku sudah banyak (BUKAN data hilang!)
+-----------------------------------------------------
+  PENYEBAB:
+   - Export pakai select('*') -> ikut menarik kolom "deskripsi" panjang
+     (hasil scan AI) utk ratusan buku sekaligus -> query kena statement
+     timeout Supabase. Data AMAN, cuma query-nya kegedean.
+   - Tampilan pengunjung: limit dinaikkan 300->2000, di instance Supabase
+     kecil menarik ~1000 baris sekaligus juga timeout -> daftar tampak kosong.
+  PERBAIKAN (ambil data BERTAHAP per potongan + kolom seperlunya):
+  src/app/api/export/route.ts       <- pagination + kolom export saja
+  src/app/api/public-books/route.ts <- pagination per 500 baris
+  src/app/api/books/route.ts        <- katalog admin: pagination + kolom ringan
+  supabase/migration-v4-performance.sql  <- (opsional) index + naikkan timeout
+
+  CATATAN FORMAT PERPUSNAS:
+   - Tombol export "format TBM" (?format=tbm) sudah PERSIS sama dgn file
+     "Buku Inventaris Perpustakaan dan TBM.xlsx" (10 kolom + Sheet2 rekap).
+   - Yang error di layarmu tadi ?format=fix (13 kolom) -> sekarang ikut
+     diperbaiki, jadi dua-duanya jalan.
+
+-----------------------------------------------------
   5) AMBIL COVER OTOMATIS (superadmin, tanpa setup)
 -----------------------------------------------------
   src/app/api/cover-backfill/route.ts
