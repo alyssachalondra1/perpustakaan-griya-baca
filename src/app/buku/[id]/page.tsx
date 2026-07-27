@@ -46,7 +46,19 @@ export default async function BookDetail({ params }: { params: { id: string } })
     <>
       <PublicHeader user={user} />
       <main className="mx-auto max-w-3xl space-y-4 px-4 py-6">
-        <Link href="/" className="text-sm font-bold text-brand-700 hover:underline">&larr; Kembali ke perpustakaan</Link>
+        <div className="flex items-center justify-between gap-2">
+          <Link href="/" className="text-sm font-bold text-brand-700 hover:underline">&larr; Kembali ke perpustakaan</Link>
+          {staff && (
+            <Link href="/tambah" className="btn-primary no-print">📷 Lanjut Scan Buku Berikutnya</Link>
+          )}
+        </div>
+
+        {staff && (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 no-print">
+            ✓ Buku tersimpan. Klik <b>Lanjut Scan</b> untuk menambah buku berikutnya, atau edit data di bawah.
+          </div>
+        )}
+
         <div className="card">
           <div className="flex flex-col gap-4 sm:flex-row">
             {b.cover_url ? (
@@ -78,7 +90,8 @@ export default async function BookDetail({ params }: { params: { id: string } })
             <div className="mt-5 flex flex-wrap gap-2 no-print">
               <Link href={`/tambah?edit=${b.id}`} className="btn-outline">Edit</Link>
               <DeleteButton id={b.id} judul={b.judul_buku} />
-              <Link href={`/label?ids=${b.id}`} className="btn-primary">Cetak Label</Link>
+              <Link href={`/label?ids=${b.id}`} className="btn-outline">Cetak Label</Link>
+              <Link href="/tambah" className="btn-primary">📷 Lanjut Scan</Link>
             </div>
           )}
         </div>
